@@ -207,10 +207,64 @@ async function loadDataFromFirestore() {
     }
 }
 
+// دالة ضغط الصورة لتحسين الأداء
+function compressImage(file, maxWidth = 800, maxSizeMB = 0.5) {
+    return new Promise((resolve, reject) => {
+        if (!file.type.match(/image.*/)) {
+            return resolve(file);
+        }
+        
+        // إذا كان حجم الصورة أصغر من الحد المسموح، لا تقم بضغطها
+        if (file.size / 1024 / 1024 < maxSizeMB) {
+            return resolve(file);
+        }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function (event) {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = function () {
+                const canvas = document.createElement("canvas");
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // حفظ الصورة بصيغة jpeg وبجودة 0.6 تقريباً لتقليص الحجم للنصف أو أكثر
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                            type: "image/jpeg",
+                            lastModified: Date.now()
+                        });
+                        resolve(compressedFile);
+                    } else {
+                        resolve(file); // في حال فشل الضغط
+                    }
+                }, "image/jpeg", 0.6);
+            };
+            img.onerror = () => resolve(file);
+        };
+        reader.onerror = () => resolve(file);
+    });
+}
+
 // دالة الرفع إلى ImgBB
 async function uploadToImgBB(file) {
+    showToast("جاري المعالجة والضغط...", false);
+    const compressedFile = await compressImage(file);
+
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", compressedFile);
     const apiKey = "eb47af92715ce25440decd59e66a5bd0";
     
     showToast("جاري رفع الصورة للمتجر...", false);
