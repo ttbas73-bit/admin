@@ -367,16 +367,16 @@ window.addProduct = async function() {
         showToast('الرجاء إدخال اسم المنتج والسعر بشكل صحيح', true); return;
     }
 
-    const editId = document.getElementById('prod-edit-id').value;
     const btn = document.querySelector('#add-product-modal .btn-primary');
-    const oldText = btn ? btn.innerHTML : 'حفظ ونشر على المتجر';
-
-    if (btn) {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> تحديث جاري...';
-        btn.disabled = true;
-    }
+    let oldText = "حفظ";
+    if (btn) oldText = btn.innerHTML;
 
     try {
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> تحديث جاري...';
+            btn.disabled = true;
+        }
+
         const productData = { 
             name, 
             price, 
@@ -384,6 +384,7 @@ window.addProduct = async function() {
             desc: desc || "منتج ممتاز متوفر الآن.",
             updatedAt: new Date().toISOString()
         };
+        const editId = document.getElementById('prod-edit-id').value;
         if(!editId) {
             productData.createdAt = new Date().toISOString();
         }
@@ -409,16 +410,20 @@ window.addProduct = async function() {
         closeModal('add-product-modal');
         
         document.getElementById('prod-edit-id').value = '';
+        
         document.getElementById('prod-img-file').value = '';
         document.getElementById('prod-img').value = '';
         document.getElementById('prod-name').value = '';
         document.getElementById('prod-desc').value = '';
         document.getElementById('prod-price').value = '';
 
+        if (btn) {
+            btn.innerHTML = oldText;
+            btn.disabled = false;
+        }
     } catch(err) {
         console.error(err);
         showToast('حدث خطأ: ' + err.message, true);
-    } finally {
         if(btn) {
             btn.innerHTML = oldText;
             btn.disabled = false;
@@ -436,22 +441,6 @@ window.deleteProduct = async function(id) {
             showToast('خطأ أثناء الحذف', true);
         }
     }
-};
-
-window.editProduct = function(id) {
-    const prod = adminProducts.find(p => p.id === id);
-    if(!prod) return;
-    document.getElementById('prod-edit-id').value = prod.id;
-    document.getElementById('prod-name').value = prod.name;
-    document.getElementById('prod-price').value = prod.price;
-    document.getElementById('prod-desc').value = prod.desc || '';
-    document.getElementById('prod-cat').value = prod.category;
-    document.getElementById('prod-img').value = prod.image_url || '';
-    
-    // Change modal title and button
-    document.querySelector('#add-product-modal h3').innerText = 'تعديل المنتج';
-    document.querySelector('#add-product-modal .btn-primary').innerText = 'حفظ التغييرات';
-    openModal('add-product-modal');
 };
 
 // --- العروض ---
@@ -487,19 +476,22 @@ window.addOffer = async function() {
     const name = document.getElementById('offer-name').value.trim();
     const colorsDataStr = document.getElementById('offer-colors-data').value;
     let colorsRaw = [];
-    try { colorsRaw = JSON.parse(colorsDataStr); } catch(e) {}
+    try {
+        colorsRaw = JSON.parse(colorsDataStr);
+    } catch(e) {}
 
     if(!name) { showToast('الرجاء كتابة اسم العرض', true); return; }
 
     const btn = document.querySelector('#add-offer-modal .btn-primary');
-    const oldText = btn ? btn.innerHTML : 'حفظ ونشر العرض';
-
-    if (btn) {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
-        btn.disabled = true;
-    }
+    let oldText = "حفظ";
+    if (btn) oldText = btn.innerHTML;
 
     try {
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+            btn.disabled = true;
+        }
+
         const colors = colorsRaw && colorsRaw.length > 0 ? colorsRaw : ["أسود"];
         const offerData = { name, colors, createdAt: new Date().toISOString() };
 
@@ -528,10 +520,13 @@ window.addOffer = async function() {
         document.getElementById('offer-colors-list').innerHTML = '';
         document.getElementById('offer-new-color').value = '';
 
+        if (btn) {
+            btn.innerHTML = oldText;
+            btn.disabled = false;
+        }
     } catch(err) {
         console.error(err);
         showToast('خطأ أثناء رفع العرض: ' + err.message, true);
-    } finally {
         if (btn) {
             btn.innerHTML = oldText;
             btn.disabled = false;
@@ -653,7 +648,8 @@ window.renderAdminCategories = function() {
                 </div>
                 <div class="list-actions">
                     <button class="btn-icon delete" onclick="deleteCategory('${c.id}')"><i class="fa-solid fa-trash"></i></button>
-                    </div>
+                    <!-- <button class="btn-icon" style="color:var(--primary)" onclick="editCategory('${c.id}')"><i class="fa-solid fa-pen"></i></button> -->
+                </div>
             </div>
         `;
     });
@@ -668,6 +664,21 @@ window.editCategory = function(id) {
     openModal('add-category-modal');
 };
 
+window.editProduct = function(id) {
+    const prod = adminProducts.find(p => p.id === id);
+    if(!prod) return;
+    document.getElementById('prod-edit-id').value = prod.id;
+    document.getElementById('prod-name').value = prod.name;
+    document.getElementById('prod-price').value = prod.price;
+    document.getElementById('prod-desc').value = prod.desc || '';
+    document.getElementById('prod-cat').value = prod.category;
+    document.getElementById('prod-img').value = prod.image_url || '';
+    
+    // Change modal title and button
+    document.querySelector('#add-product-modal h3').innerText = 'تعديل المنتج';
+    document.querySelector('#add-product-modal .btn-primary').innerText = 'حفظ التغييرات';
+    openModal('add-product-modal');
+};
 window.addCategory = async function() {
     const editId = document.getElementById('category-edit-id').value;
     const cid = document.getElementById('category-id').value.trim();
@@ -679,14 +690,15 @@ window.addCategory = async function() {
     }
 
     const btn = document.querySelector('#add-category-modal .btn-primary');
-    const oldText = btn ? btn.innerHTML : 'حفظ القسم';
-
-    if (btn) {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
-        btn.disabled = true;
-    }
+    let oldText = "حفظ";
+    if (btn) oldText = btn.innerHTML;
 
     try {
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+            btn.disabled = true;
+        }
+
         let finalImage = "";
         if (fileInput && fileInput.files.length > 0) {
             finalImage = await uploadToImgBB(fileInput.files[0]);
@@ -696,6 +708,10 @@ window.addCategory = async function() {
                 finalImage = oldCat.img || ''; 
             } else {
                 showToast('يرجى اختيار صورة للقسم المضاف', true);
+                if (btn) {
+                    btn.innerHTML = oldText;
+                    btn.disabled = false;
+                }
                 return;
             }
         }
@@ -719,10 +735,13 @@ window.addCategory = async function() {
         if(fileInput) fileInput.value = '';
         document.getElementById('category-edit-id').value = '';
 
+        if (btn) {
+            btn.innerHTML = oldText;
+            btn.disabled = false;
+        }
     } catch (e) {
         console.error(e);
         showToast('فشل في الإضافة/التعديل: ' + e.message, true);
-    } finally {
         if (btn) {
             btn.innerHTML = oldText;
             btn.disabled = false;
@@ -775,14 +794,15 @@ window.addBanner = async function() {
     }
 
     const btn = document.querySelector('#add-banner-modal .btn-primary');
-    const oldText = btn ? btn.innerHTML : 'إضافة بنر';
-
-    if (btn) {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الرفع والاضافة...';
-        btn.disabled = true;
-    }
+    let oldText = "حفظ";
+    if (btn) oldText = btn.innerHTML;
 
     try {
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الرفع والاضافة...';
+            btn.disabled = true;
+        }
+
         let finalImage = "";
         
         if (fileInput.files.length > 0) {
@@ -799,10 +819,13 @@ window.addBanner = async function() {
         document.getElementById('banner-title').value = '';
         document.getElementById('banner-img-file').value = '';
 
+        if (btn) {
+            btn.innerHTML = oldText;
+            btn.disabled = false;
+        }
     } catch (e) {
         console.error(e);
         showToast('فشل في الإضافة: ' + e.message, true);
-    } finally {
         if (btn) {
             btn.innerHTML = oldText;
             btn.disabled = false;
