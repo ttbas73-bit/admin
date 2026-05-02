@@ -211,7 +211,7 @@ async function loadDataFromFirestore() {
 async function uploadToImgBB(file) {
     const formData = new FormData();
     formData.append("image", file);
-    const apiKey = "3ad79315add672d9728e5b0220a7e36b";
+    const apiKey = "eb47af92715ce25440decd59e66a5bd0";
     
     showToast("جاري رفع الصورة للمتجر...", false);
 
