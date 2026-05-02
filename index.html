@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لوحة تحكم امزون فون</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-right">
+            <h2 data-i18n="admin_panel">لوحة الإدارة <i class="fa-solid fa-gears"></i></h2>
+        </div>
+        <div class="header-left">
+            <select id="lang-switcher" class="lang-select" onchange="changeLanguage(this.value)">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+                <option value="ku">Kurdish</option>
+            </select>
+            <button id="theme-toggle" class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Dashboard Tab -->
+        <section id="tab-dashboard" class="tab-content active">
+            <h3 class="section-title" data-i18n="store_overview">نظرة عامة على المتجر</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-box"></i></div>
+                    <div class="stat-info">
+                        <h4 data-i18n="products">المنتجات</h4>
+                        <p id="total-products">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                    <div class="stat-info">
+                        <h4 data-i18n="total_orders">الطلبات الكلية</h4>
+                        <p id="total-orders">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                    <div class="stat-info">
+                        <h4 data-i18n="completed_sales">المبيعات (مكتملة)</h4>
+                        <p id="total-revenue" style="font-size: 18px;">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="section-title" style="margin-top: 25px;" data-i18n="quick_alerts">تنبيهات سريعة</h3>
+            <div class="alert-box">
+                <i class="fa-solid fa-bell"></i> <span data-i18n="you_have">لديك</span> <strong id="pending-count">0</strong> <span data-i18n="pending_alert">طلبات بانتظار التأكيد!</span>
+            </div>
+        </section>
+
+        <!-- Products Tab -->
+        <section id="tab-products" class="tab-content">
+            <div class="flex-between">
+                <h3 class="section-title" data-i18n="manage_products">إدارة المنتجات</h3>
+                <button class="btn-primary-small" onclick="openModal('add-product-modal')"><i class="fa-solid fa-plus"></i> <span data-i18n="add_product">رفع منتج</span></button>
+            </div>
+            <div class="admin-list" id="admin-products-list">
+                <!-- Products will be dynamically added here -->
+            </div>
+        </section>
+
+        <!-- Orders Tab -->
+        <section id="tab-orders" class="tab-content">
+            <h3 class="section-title" data-i18n="incoming_orders">الطلبات الواردة</h3>
+            <div class="orders-tabs">
+                <button class="active" id="tab-btn-pending" onclick="filterOrdersView('pending')" data-i18n="status_pending_text">بانتظار التأكيد</button>
+                <button id="tab-btn-completed" onclick="filterOrdersView('completed')" data-i18n="status_completed_text">المكتملة</button>
+            </div>
+            <div class="admin-list" id="admin-orders-list">
+                <!-- Orders will be dynamically added here -->
+            </div>
+        </section>
+
+        <!-- Offers Tab -->
+        <section id="tab-offers" class="tab-content">
+            <div class="flex-between">
+                <h3 class="section-title" data-i18n="manage_offers">إدارة العروض (5 بـ 15)</h3>
+                <button class="btn-primary-small" onclick="openModal('add-offer-modal')"><i class="fa-solid fa-plus"></i> <span data-i18n="add_offer">إضافة عرض</span></button>
+            </div>
+            <div class="admin-list" id="admin-offers-list">
+                <!-- Offers will be dynamically added here -->
+            </div>
+        </section>
+
+        <!-- Categories Tab -->
+        <section id="tab-categories" class="tab-content">
+            <div class="flex-between">
+                <h3 class="section-title" data-i18n="manage_categories">إدارة الأقسام</h3>
+                <button class="btn-primary-small" onclick="openModal('add-category-modal')"><i class="fa-solid fa-plus"></i> <span data-i18n="add_category">إضافة قسم</span></button>
+            </div>
+            <div class="admin-list" id="admin-categories-list">
+            </div>
+        </section>
+
+        <!-- Banners Tab -->
+        <section id="tab-banners" class="tab-content">
+            <div class="flex-between">
+                <h3 class="section-title" data-i18n="manage_banners">إدارة البنرات</h3>
+                <button class="btn-primary-small" onclick="openModal('add-banner-modal')"><i class="fa-solid fa-plus"></i> <span data-i18n="add_banner">إضافة بنر</span></button>
+            </div>
+            <div class="admin-list" id="admin-banners-list">
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation Tabs -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('dashboard', this)">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span data-i18n="nav_home">الرئيسية</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('products', this)">
+            <i class="fa-solid fa-box-open"></i>
+            <span data-i18n="nav_products">المنتجات</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('orders', this)">
+            <span class="badge" id="orders-badge">0</span>
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span data-i18n="nav_orders">الطلبات</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('offers', this)">
+            <i class="fa-solid fa-tags"></i>
+            <span data-i18n="nav_offers">العروض</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('categories', this)">
+            <i class="fa-solid fa-layer-group"></i>
+            <span data-i18n="nav_categories">الأقسام</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('banners', this)">
+            <i class="fa-solid fa-images"></i>
+            <span data-i18n="nav_banners">البنرات</span>
+        </div>
+    </nav>
+
+    <!-- Modal: Add Product -->
+    <div id="add-product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('add-product-modal')"><i class="fa-solid fa-xmark"></i></span>
+            <h3><i class="fa-solid fa-upload"></i> رفع منتج جديد</h3>
+            <input type="hidden" id="prod-edit-id">
+            <div class="form-group flex-group">
+                <div style="flex:1">
+                    <label>صورة المنتج (ملف)</label>
+                    <input type="file" id="prod-img-file" accept="image/*" style="padding:11px;">
+                </div>
+                <div style="flex:1">
+                    <label>أو رابط الصورة (URL)</label>
+                    <input type="text" id="prod-img" placeholder="https://...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>اسم/عنوان المنتج</label>
+                <input type="text" id="prod-name" placeholder="ادخل عنوان المنتج...">
+            </div>
+            <div class="form-group">
+                <label>وصف المنتج</label>
+                <textarea id="prod-desc" placeholder="تفاصيل المنتج ومميزاته..." rows="3"></textarea>
+            </div>
+            <div class="form-group flex-group">
+                <div style="flex:1">
+                    <label>السعر (د.ع)</label>
+                    <input type="number" id="prod-price" placeholder="مثال: 15000">
+                </div>
+                <div style="flex:1">
+                    <label>القسم</label>
+                    <select id="prod-cat">
+                        <option value="phones">أجهزة هواتف</option>
+                        <option value="covers">كفرات حماية</option>
+                        <option value="accessories">ملحقات ذكية</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="addProduct()">حفظ ونشر على المتجر</button>
+        </div>
+    </div>
+
+    <!-- Modal: Add Offer -->
+    <div id="add-offer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('add-offer-modal')"><i class="fa-solid fa-xmark"></i></span>
+            <h2><i class="fa-solid fa-tag"></i> إضافة عرض جديد</h2>
+            <div class="form-group flex-group">
+                <div style="flex:1">
+                    <label>صورة العرض (ملف)</label>
+                    <input type="file" id="offer-img-file" accept="image/*" style="padding:11px;">
+                </div>
+                <div style="flex:1">
+                    <label>أو رابط الصورة (URL)</label>
+                    <input type="text" id="offer-img" placeholder="https://...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>اسم العرض</label>
+                <input type="text" id="offer-name" placeholder="مثال: سماعة لاسلكية">
+            </div>
+            <div class="form-group">
+                <label>الألوان المتاحة</label>
+                <div id="offer-colors-list" style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 5px;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="offer-new-color" placeholder="اكتب اللون هنا (مثال: أبيض)" onkeypress="if(event.key === 'Enter') { event.preventDefault(); addOfferColor(); }">
+                    <button type="button" class="btn-primary-small" style="width: auto; padding: 0 15px;" onclick="addOfferColor()"><i class="fa-solid fa-plus"></i></button>
+                </div>
+                <input type="hidden" id="offer-colors-data" value="[]">
+            </div>
+            <button class="btn-primary" onclick="addOffer()">حفظ ونشر العرض</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Modal: Add/Edit Category -->
+    <div id="add-category-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('add-category-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="section-title">إضافة / تعديل قسم</h3>
+            <input type="hidden" id="category-edit-id">
+            <div class="form-group">
+                <label>معرف القسم (الرابط الداخلي - بالانجليزية)</label>
+                <input type="text" id="category-id" placeholder="مثال: phones">
+            </div>
+            <div class="form-group">
+                <label>اسم القسم</label>
+                <input type="text" id="category-name" placeholder="أدخل اسم القسم">
+            </div>
+            <div class="form-group flex-group">
+                <div style="flex:1">
+                    <label>صورة القسم (ملف)</label>
+                    <input type="file" id="category-img-file" accept="image/*" style="padding:11px;">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="addCategory()">حفظ القسم</button>
+        </div>
+    </div>
+
+    <!-- Modal: Add Banner -->
+    <div id="add-banner-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('add-banner-modal')"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="section-title">إضافة بنر</h3>
+            <div class="form-group">
+                <label>اسم/وصف للإعلان (اختياري)</label>
+                <input type="text" id="banner-title" placeholder="أدخل واسم للإعلان">
+            </div>
+            <div class="form-group flex-group">
+                <div style="flex:1">
+                    <label>صورة البنر (ملف)</label>
+                    <input type="file" id="banner-img-file" accept="image/*" style="padding:11px;">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="addBanner()">إضافة البنر</button>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
